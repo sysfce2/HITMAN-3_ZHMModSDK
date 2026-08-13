@@ -71,19 +71,19 @@ public:
     void OnDrawMenu() const;
 
 public:
-    void SetSwapChain(Rendering::D3D12SwapChain* p_SwapChain);
+    void SetSwapChain(IDXGISwapChain3* p_SwapChain);
+    void SetCommandQueue(ID3D12CommandQueue* p_CommandQueue);
     void OnPresent(IDXGISwapChain3* p_SwapChain);
     void PostPresent(IDXGISwapChain3* p_SwapChain, HRESULT p_PresentResult);
-    void SetCommandQueue(ID3D12CommandQueue* p_CommandQueue);
     void OnReset(IDXGISwapChain3* p_SwapChain);
     void PostReset(IDXGISwapChain3* p_SwapChain);
 
 public:
     std::shared_ptr<ModLoader> GetModLoader() const { return m_ModLoader; }
 
-    #if _DEBUG
+#if _DEBUG
     std::shared_ptr<DebugConsole> GetDebugConsole() const { return m_DebugConsole; }
-    #endif
+#endif
 
     std::shared_ptr<Rendering::Renderers::DirectXTKRenderer> GetDirectXTKRenderer() const {
         return m_DirectXTKRenderer;
@@ -103,7 +103,7 @@ public:
     void SetHasShownUiToggleWarning();
 
 public:
-    #pragma region IModSDK implementation
+#pragma region IModSDK implementation
 
     void RequestUIFocus() override;
     void ReleaseUIFocus() override;
@@ -130,7 +130,7 @@ public:
         void* p_OriginalCode
     ) override;
 
-    void ImGuiGameRenderTarget(ZRenderDestination* p_RT, const ImVec2& p_Size = {0, 0}) override;
+    void ImGuiGameRenderTarget(ZRenderDestination* p_RT, const ImVec2& p_Size = { 0, 0 }) override;
 
     // Plugin settings
     void SetPluginSetting(
@@ -205,12 +205,12 @@ public:
         ImGuiTexture& p_OutImGuiTexture
     ) override;
 
-    #pragma endregion
+#pragma endregion
 
     void AllocateZString(ZString* p_Target, const char* p_Str, uint32_t p_Size);
 
 private:
-    #pragma region Detours
+#pragma region Detours
 
     DECLARE_DETOUR_WITH_CONTEXT(ModSDK, bool, Engine_Init, void* th, void* a2);
     DECLARE_DETOUR_WITH_CONTEXT(ModSDK, EOS_PlatformHandle*, EOS_Platform_Create, EOS_Platform_Options* Options);
@@ -244,7 +244,7 @@ private:
         const char* msg
     );
 
-    #pragma endregion
+#pragma endregion
 
     bool PatchCodeInternal(
         const char* p_Pattern, const char* p_Mask, void* p_NewCode, size_t p_CodeSize, ptrdiff_t p_Offset,
@@ -253,7 +253,7 @@ private:
 
     void UpdateSdkIni(std::function<void(mINI::INIMap<std::string>&)> p_Callback);
 
-    #pragma region ResourceLoading
+#pragma region ResourceLoading
 
 public:
     bool LoadQnEntity(
@@ -274,11 +274,14 @@ private:
 
     void LoadResourceChunkMap();
 
-    #pragma endregion
+#pragma endregion
 
 private:
     static const char* GameStateToString(ZLevelManager::EGameState p_GameState);
     static const char* SceneLoadingStageToString(ESceneLoadingStage p_SceneLoadingStage);
+
+    static void ImDrawCallback_SetGameDescriptorHeap(const ImDrawList* p_DrawList, const ImDrawCmd* p_Command);
+    static void ImDrawCallback_ResetDescriptorHeap(const ImDrawList* p_DrawList, const ImDrawCmd* p_Command);
 
 private:
     bool m_UiEnabled = true;
@@ -302,9 +305,9 @@ private:
 
     std::shared_ptr<ModLoader> m_ModLoader {};
 
-    #if _DEBUG
+#if _DEBUG
     std::shared_ptr<DebugConsole> m_DebugConsole {};
-    #endif
+#endif
 
     std::shared_ptr<Rendering::Renderers::DirectXTKRenderer> m_DirectXTKRenderer {};
     std::shared_ptr<Rendering::Renderers::ImGuiRenderer> m_ImguiRenderer {};
